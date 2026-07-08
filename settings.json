@@ -15,5 +15,5 @@
     "MIN_SPEED" : -25,
     "ACCELERATION" : 5,
     "DEFAULT_ANGLES" : [90, 90, 90],
-    "ANGLE_STEP" : 2
+    "ANGLE_STEP" : 5
 }

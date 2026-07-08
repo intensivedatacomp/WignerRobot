@@ -97,10 +97,10 @@ def accelerateCar(Control, sgn, settings):
             Control.speed[1] = max(Control.speed[1] - settings["ACCELERATION"], settings["MIN_SPEED"])
 
 def turnCar(Control, sgn, settings):
-    if sgn == 1:
+    if sgn == -1:
         Control.speed[0] = max(Control.speed[0] - settings["ACCELERATION"], settings["MIN_SPEED"])
         Control.speed[1] = min(Control.speed[1] + settings["ACCELERATION"], settings["MAX_SPEED"])
-    elif sgn == -1:
+    elif sgn == 1:
         Control.speed[0] = min(Control.speed[0] + settings["ACCELERATION"], settings["MAX_SPEED"])
         Control.speed[1] = max(Control.speed[1] - settings["ACCELERATION"], settings["MIN_SPEED"])
 
