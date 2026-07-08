@@ -57,6 +57,7 @@ def handle_key_press(event, root, Control, settings):
         return
     if event.keysym == 'space':
         Control.speed = [0,0]
+        Control.angles = settings["DEFAULT_ANGLES"]
         return
     
     # Servo control
