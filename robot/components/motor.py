@@ -85,10 +85,10 @@ class Motor:
             if len(speed) != 2:
                 raise ValueError("Speed list must have 2 elements")
             sp = {
-                "UL": speed[0]+speed[1]/2,
-                "LL": speed[0]+speed[1]/2,
-                "UR": speed[0]-speed[1]/2,
-                "LR": speed[0]-speed[1]/2
+                "UL": speed[0],
+                "LL": speed[0],
+                "UR": speed[1],
+                "LR": speed[1]
             }
             self.set_speed(sp)
 
