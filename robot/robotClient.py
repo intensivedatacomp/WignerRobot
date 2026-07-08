@@ -1,4 +1,5 @@
 import json
+import socket
 from threading import Thread
 from videoClient import VideoClient
 import sys
@@ -26,8 +27,7 @@ video_client = VideoClient(
     fps=settings["FPS"],
 )
 
-video_thread = Thread(target=video_client.run)
-video_thread.start()
+video_client.start()
 
 print("Starting hardware components")
 motor = Motor()
@@ -39,5 +39,48 @@ servo.start(Control, settings["THREAD_SLEEP"])
 us_sensor = USSensor()
 us_sensor.start(Control, settings["THREAD_SLEEP"])
 
+buzzer = Buzzer()
+buzzer.start(settings["THREAD_SLEEP"])
+
 print("Starting control client")
 control_client = ControlClient(settings["HOST_IP"], settings["CONTROL_PORT"])
+
+while not Control.shutdown:
+    try:
+        data = control_client.getData()
+    except socket.timeout:
+        print("Control signal timeout - Shutdown")
+        Control.shutdown = True        
+    if data:
+        try:
+            params = json.loads(data)
+            Control.shutdown = params["shutdown"]
+            Control.speed = params["speed"]
+            Control.angles = params["angles"]
+            Control.us_measuring = params["us_measuring"]
+            Control.time = params["time"]
+            if params["buzzer"] != "":
+                buzzer.play(params["buzzer"])
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON data: {e}")
+    else: 
+        Control.shutdown = True
+        print("Error: No data recieved")
+        break
+
+
+print("Shutting down control client")
+try:
+    control_client.close()
+except Exception as e:
+    print(f"Error closing control client: {e}")
+
+print("Shutting down video client")
+video_client.stop()
+
+
+print("Stopping hardware components")
+del motor
+del servo
+del us_sensor
+del buzzer

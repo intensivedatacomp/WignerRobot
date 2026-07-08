@@ -22,3 +22,7 @@ class ControlClient:
         except socket.error as e:
             print(f"Socket error occurred: {e}")
             return None
+    
+    def close(self):
+        self.client_socket.close()
+        

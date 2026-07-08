@@ -22,6 +22,8 @@ class VideoClient:
         self.capture = None
         self.encoder = None
         self.pipe = None
+        self.running = False
+        self.thread = None
 
     def capture_command(self, ffmpeg, encoder):
         base = [
@@ -153,6 +155,11 @@ class VideoClient:
                 self.encoder.kill()
                 self.encoder.wait()
 
+    def start(self):
+        self.running = True
+        self.thread = threading.Thread(target=self.run, daemon=True)
+        self.thread.start()
+
     def run(self):
         self.setup_capture()
         self.encoder = self.start_encoder()
@@ -163,7 +170,7 @@ class VideoClient:
         frame_interval = 1.0 / self.fps
         last_sent = 0.0
         try:
-            while True:
+            while self.running:
                 ok, frame = self.capture.read()
                 if not ok:
                     continue
@@ -190,3 +197,8 @@ class VideoClient:
             pass
         finally:
             self.cleanup()
+    
+    def stop(self):
+        self.running = False
+        if self.thread is not None:
+            self.thread.join()

@@ -8,6 +8,6 @@
     "IMAGE_CHANNELS" : 3,
     "FPS" : 30,
 
-    "THREAD_SLEEP" : 0.01,
+    "THREAD_SLEEP" : 0.2,
     "TIMEOUT_TIME" : 1.0
 }
