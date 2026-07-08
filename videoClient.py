@@ -5,14 +5,13 @@ import time
 
 import cv2
 
-TARGET_HOST = "192.168.137.43"
+TARGET_HOST = "127.0.0.1"
 PORT = 5000
 CAMERA = 0
-WIDTH = 640
-HEIGHT = 480
+WIDTH = 200
+HEIGHT = 100
 FPS = 30
 ENCODERS = ["h264_nvenc", "h264_qsv", "h264_amf", "libx264"]
-
 
 def preprocess_capture(frame):
     return frame

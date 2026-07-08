@@ -1,6 +1,9 @@
 import shutil
 import subprocess
 import threading
+import torch
+import torchvision
+import image_processing
 
 import numpy as np
 from PIL import Image, ImageTk
@@ -8,14 +11,24 @@ import tkinter as tk
 
 PORT = 5000
 TITLE = "Robot Feed"
-WIDTH = 640
-HEIGHT = 480
+WIDTH = 200
+HEIGHT = 100
 LISTEN_HOST = "0.0.0.0"
 FRAME_SIZE = WIDTH * HEIGHT * 3
 
 
 def preprocess_display(frame):
-    return frame
+    image = torchvision.transforms.ToTensor()(frame)[:3]
+    detector = image_processing.EdgeDetector() 
+    edges = detector.detect(image)
+
+    edges_array = edges.squeeze().detach().cpu().numpy()
+    edges_array = np.abs(edges_array)
+    if edges_array.max() <= 1.0:
+        edges_array = edges_array * 255.0
+    edges_array = np.clip(edges_array, 0, 255).astype(np.uint8)
+    
+    return edges_array
 
 
 def recv_exact(pipe, size):
