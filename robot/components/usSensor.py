@@ -35,10 +35,12 @@ class USSensor:
         while not GPIO.input(self.US_ECHO):
             if time.time() - t0 > 1:
                 return -1
+            time.sleep(0)
         t1 = time.monotonic_ns()
         while GPIO.input(self.US_ECHO):
             if time.time() - t0 > 10:
                 return -1
+            time.sleep(0)
         t2 = time.monotonic_ns()
         return ((t2 - t1) * 340 / 2 ) / 1000000000
     
