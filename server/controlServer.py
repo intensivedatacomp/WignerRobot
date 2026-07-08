@@ -18,6 +18,8 @@ class ControlServer:
         print("Waiting for connection...")
 
     def close(self):
+        self.running = False
+        self.thread.join()
         self.server_socket.close()
 
     def start(self, Control, thread_sleep):

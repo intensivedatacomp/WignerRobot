@@ -15,6 +15,7 @@ def refresh_display():
         root.after(10, refresh_display)
     else:
         video_server.close_window()
+        controlC.close()
         root.destroy()
         exit(0)
 
