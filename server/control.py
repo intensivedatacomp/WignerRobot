@@ -6,3 +6,5 @@ class Control:
     us_measurement = 0
     time = 0,
     buzzer = ""
+    pressed_l = False
+    pressed_b = False

@@ -7,7 +7,7 @@ import sys
 sys.path.append('./server')
 
 from control import Control
-from keybindings import handle_keypress
+from keybindings import handle_key_press
 
 def refresh_display():
     video_server.refresh_gui()
@@ -52,7 +52,7 @@ print("Setup key bindings")
 pressed_l = False
 pressed_b = False
 
-root.bind("<KeyPress>", lambda event: handle_keypress(event, root, Control, settings))
+root.bind("<Key>", lambda event: handle_key_press(event, root, Control, settings))
 
 print("Starting mainloop")
 root.mainloop()
