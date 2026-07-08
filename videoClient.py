@@ -6,11 +6,11 @@ import time
 import cv2
 
 TARGET_HOST = "127.0.0.1"
-PORT = 5000
+PORT = 5001
 CAMERA = 0
-WIDTH = 200
-HEIGHT = 100
-FPS = 30
+WIDTH = 600
+HEIGHT = 400
+FPS = 60
 ENCODERS = ["h264_nvenc", "h264_qsv", "h264_amf", "libx264"]
 
 def preprocess_capture(frame):
@@ -40,6 +40,8 @@ def capture_command(ffmpeg, encoder):
         str(FPS),
         "-bf",
         "0",
+        "-flush_packets",
+        "1",
     ]
     if encoder == "h264_nvenc":
         base += ["-preset", "p1", "-tune", "ll"]

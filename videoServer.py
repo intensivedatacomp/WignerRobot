@@ -4,23 +4,33 @@ import threading
 import torch
 import torchvision
 import image_processing
+import time
 
 import numpy as np
 from PIL import Image, ImageTk
 import tkinter as tk
 
-PORT = 5000
+PORT = 5001
 TITLE = "Robot Feed"
-WIDTH = 200
-HEIGHT = 100
+WIDTH = 600
+HEIGHT = 400
 LISTEN_HOST = "0.0.0.0"
 FRAME_SIZE = WIDTH * HEIGHT * 3
 
+if torch.backends.cuda.is_available():
+    device = torch.device("cuda")
+    print("Using CUDA")
+else:
+    device = torch.device("cpu")
+    print("Using CPU")
+to_tensor = torchvision.transforms.ToTensor()
+edge_detector = image_processing.EdgeDetector()
+
 
 def preprocess_display(frame):
-    image = torchvision.transforms.ToTensor()(frame)[:3]
-    detector = image_processing.EdgeDetector() 
-    edges = detector.detect(image)
+    image = to_tensor(frame)[:3].to(device)
+    with torch.no_grad():
+        edges = edge_detector.detect(image)
 
     edges_array = edges.squeeze().detach().cpu().numpy()
     edges_array = np.abs(edges_array)
@@ -113,8 +123,7 @@ def receiver_loop(latest, stop_event, decoder):
         while not stop_event.is_set():
             payload = recv_exact(stdout, FRAME_SIZE)
             frame = np.frombuffer(payload, dtype=np.uint8).reshape((HEIGHT, WIDTH, 3)).copy()
-            latest["frame"] = preprocess_display(frame)
-            latest["count"] += 1
+            latest["raw"] = frame
     except (ConnectionError, OSError):
         pass
     finally:
@@ -124,6 +133,23 @@ def receiver_loop(latest, stop_event, decoder):
             decoder.terminate()
         except OSError:
             pass
+
+def processing_loop(latest, stop_event):
+
+    while not stop_event.is_set():
+
+        frame = latest["raw"]
+
+        if frame is None:
+            time.sleep(0.001)
+            continue
+
+        latest["raw"] = None
+
+        processed = preprocess_display(frame)
+
+        latest["frame"] = processed
+        latest["count"] += 1
 
 
 def refresh_gui(root, image_label, latest, stop_event):
@@ -138,6 +164,17 @@ def refresh_gui(root, image_label, latest, stop_event):
 
     if latest["count"] != latest["shown"]:
         latest["shown"] = latest["count"]
+        # For displaying curent FPS
+        now = time.perf_counter()
+        elapsed = now - latest["last_fps_time"]
+
+        if elapsed >= 1.0:
+            frames = latest["shown"] - latest["last_fps_count"]
+            latest["fps"] = frames / elapsed
+            latest["last_fps_time"] = now
+            latest["last_fps_count"] = latest["shown"]
+        root.title(f"{TITLE} - {latest['fps']:.1f} FPS")
+
         photo = ImageTk.PhotoImage(image=Image.fromarray(latest["frame"]))
         image_label.configure(image=photo)
         image_label.image = photo
@@ -153,13 +190,24 @@ def main() -> None:
     image_label = tk.Label(root, bg="#111111", text="Waiting for stream...", fg="#dddddd")
     image_label.pack(fill="both", expand=True)
 
-    latest = {"frame": None, "count": 0, "shown": 0, "error": None}
+    # latest = {"raw": None, "frame": None, "count": 0, "shown": 0, "error": None}
+    latest = {
+        "raw": None,
+        "frame": None,
+        "count": 0,
+        "shown": 0,
+        "error": None,
+        "fps": 0.0,
+        "last_fps_time": time.perf_counter(),
+        "last_fps_count": 0,
+    }
     stop_event = threading.Event()
     decoder = start_decoder()
 
     root.protocol("WM_DELETE_WINDOW", lambda: close_window(root, stop_event, decoder))
 
     threading.Thread(target=receiver_loop, args=(latest, stop_event, decoder), daemon=True).start()
+    threading.Thread(target=processing_loop,args=(latest,stop_event),daemon=True).start()
     root.after(10, refresh_gui, root, image_label, latest, stop_event)
     root.mainloop()
 
