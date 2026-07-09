@@ -4,5 +4,5 @@ class Control:
     angles = [90, 90, 90]
     us_measuring = False
     us_measurement = 0
-    time = 0,
+    time = 0
     buzzer = ""

@@ -18,9 +18,9 @@ class Servo:
             "camera_vertical" : self.camera_vertical
         }
         self.repeat = {
-            "us" : 1,
-            "camera_horizontal" : 1,
-            "camera_vertical" : 1
+            "us" : 5,
+            "camera_horizontal" : 5,
+            "camera_vertical" : 5
         }
 
         GPIO.setup(self.camera_horizontal, GPIO.OUT)
@@ -51,7 +51,7 @@ class Servo:
     def control_thread(self, Control, thread_sleep):
         while self.running:
             for i in range(3):
-                if True: #self.angles[i] != Control.angles[i]:
+                if self.angles[i] != Control.angles[i]:
                     self.servoPulse(list(self.names.keys())[i], Control.angles[i])
                     self.angles[i] = Control.angles[i]
             time.sleep(thread_sleep)
