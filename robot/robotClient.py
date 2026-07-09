@@ -43,7 +43,7 @@ buzzer = Buzzer()
 buzzer.start(settings["THREAD_SLEEP"])
 
 print("Starting control client")
-control_client = ControlClient(settings["HOST_IP"], settings["CONTROL_PORT"])
+control_client = ControlClient(settings["HOST_IP"], settings["CONTROL_PORT"], settings["TIMEOUT_TIME"])
 
 while not Control.shutdown:
     try:
