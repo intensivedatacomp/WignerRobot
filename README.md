@@ -150,7 +150,3 @@ Buzzer songs are defined as `[frequency, duration]` note pairs in `songs.json` â
 - **Add a song:** append a new `"name": [[freq, duration], ...]` entry to `songs.json`, then bind a key to it in `server/keybindings.py`.
 - **Add a dot-matrix icon:** append a new 16-byte array to `dot_matrices.json` and display it with `DotMatrix.show("name")`.
 - **Change video encoders:** `VideoClient` tries encoders in the order given by its `encoders` argument (default: `h264_nvenc`, `h264_qsv`, `h264_amf`, `libx264`), probing each before use and falling back automatically if unavailable.
-
-## License
-
-No license file is currently included in this repository. Add a `LICENSE` file to specify the terms under which this project may be used, modified, and distributed.
